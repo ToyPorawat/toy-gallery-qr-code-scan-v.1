@@ -1,0 +1,1498 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#FBFCFA">
+<title>Toy Gallery 2000's</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+    theme: { extend: {
+        fontFamily: {
+            display: ['"Jost"', '"Kanit"', 'serif'],
+            sans:    ['"Kanit"', 'sans-serif']
+        },
+        colors: {
+            cream: '#FBFCFA', sand: '#F1F4EC', line: '#D3DDC8',
+            ink: '#1F2A22', muted: '#6F7A68',
+            gold: { DEFAULT: '#74906B', dark: '#4A6444', light: '#BFCDB5' }
+        },
+        boxShadow: {
+            'soft': '0 8px 32px -8px rgba(31,42,34,0.06)',
+            'float': '0 12px 32px -12px rgba(116,144,107,0.5)',
+            'gold-glow': '0 0 20px -5px rgba(116,144,107,0.3)',
+        }
+    }}
+}
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&family=Jost:wght@300;400;600&display=swap" rel="stylesheet">
+
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+
+<style type="text/tailwindcss">
+    body         { @apply bg-gradient-to-br from-[#FBFCFA] via-[#F1F4EC] to-[#E1E8D8] text-ink min-h-screen selection:bg-gold/20 selection:text-gold-dark; }
+    .text-luxury { @apply bg-gradient-to-r from-[#5E7A57] via-[#74906B] to-[#5E7A57] bg-clip-text text-transparent inline-block; }
+    .btn-primary { @apply inline-flex items-center justify-center gap-2 h-10 sm:h-11 px-5 sm:px-7 rounded-full bg-gradient-to-r from-[#74906B] to-[#4A6444] text-white text-[13px] sm:text-[14px] font-medium tracking-wide hover:from-[#65815C] hover:to-[#3C5337] hover:-translate-y-0.5 active:scale-[.97] transition-all duration-300 shadow-float disabled:opacity-50 disabled:pointer-events-none; }
+    .btn-ghost   { @apply inline-flex items-center justify-center gap-2 h-10 px-4 sm:px-5 rounded-full border border-line bg-white/60 backdrop-blur-sm text-[12px] sm:text-[13px] font-medium text-ink hover:bg-white hover:border-gold/50 hover:shadow-gold-glow hover:text-gold-dark active:scale-[.97] transition-all duration-300 disabled:opacity-40 disabled:pointer-events-none; }
+    .btn-icon    { @apply inline-flex items-center justify-center w-10 h-10 rounded-full text-muted hover:text-gold-dark hover:bg-white hover:shadow-soft transition-all duration-300; }
+    .btn-danger  { @apply inline-flex items-center justify-center h-9 w-9 sm:h-10 sm:w-10 rounded-full border border-red-100 bg-white/70 text-red-500 hover:bg-red-50 hover:border-red-200 transition; }
+    .input       { @apply w-full h-11 sm:h-12 px-4 sm:px-5 rounded-xl sm:rounded-2xl border border-line bg-white/70 text-[13px] sm:text-sm text-ink placeholder:text-stone-400 focus:outline-none focus:ring-4 focus:ring-gold/15 focus:border-gold/60 focus:bg-white transition-all duration-300; }
+    .card        { @apply bg-white/70 backdrop-blur-xl border border-white/80 rounded-2xl sm:rounded-[2rem] shadow-soft relative overflow-hidden; }
+    .card::before { content: ''; @apply absolute inset-0 border border-gold/10 rounded-2xl sm:rounded-[2rem] pointer-events-none; }
+    .eyebrow     { @apply text-[10px] sm:text-[11px] uppercase tracking-[0.25em] text-gold-dark font-medium; }
+    .label       { @apply block text-[12px] sm:text-[13px] font-medium text-muted mb-1.5 sm:mb-2 ml-1; }
+    .chip        { @apply inline-flex items-center gap-1.5 text-[9px] sm:text-[10px] uppercase tracking-[0.18em] px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full font-medium border; }
+    .admin-tab   { @apply flex items-center gap-2 sm:gap-3 px-3 sm:px-4 h-10 sm:h-11 rounded-xl sm:rounded-2xl text-[13px] sm:text-[14px] text-muted hover:text-gold-dark hover:bg-white hover:shadow-sm transition-all whitespace-nowrap; }
+    .admin-tab.active { @apply bg-gradient-to-r from-gold to-gold-dark text-white font-medium shadow-md border-none hover:text-white; }
+</style>
+
+<style>
+    :root { --ease: cubic-bezier(.22,.8,.24,1); }
+    body { -webkit-font-smoothing: antialiased; -webkit-tap-highlight-color: transparent; }
+    .rise { animation: rise 1s var(--ease) both; animation-delay: var(--d, 0ms); }
+    @keyframes rise { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: none; } }
+    .fade-in { animation: fadeIn .5s var(--ease) both; }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+    .tile { opacity: 0; transform: translateY(28px); transition: opacity .9s var(--ease), transform .9s var(--ease), box-shadow .4s var(--ease); transition-delay: var(--d, 0ms); }
+    .tile.in { opacity: 1; transform: none; }
+    .tile img { opacity: 0; transform: scale(1.08); filter: blur(10px); transition: opacity .8s var(--ease), transform 1.2s var(--ease), filter .9s var(--ease), border-radius .4s var(--ease); }
+    .tile img.loaded { opacity: 1; transform: scale(1); filter: none; }
+    .tile-shade { opacity: 0; transition: opacity .4s var(--ease); }
+    @media (hover: hover) {
+        .tile:hover { box-shadow: 0 10px 30px -10px rgba(116,144,107,0.3); }
+        .tile:hover img.loaded { transform: scale(1.05); }
+        .tile:hover .tile-shade { opacity: 1; }
+        .tile-dl { opacity: 0; transform: translateY(8px); }
+        .tile:hover .tile-dl { opacity: 1; transform: none; }
+    }
+    @media (hover: none) { .tile-shade { opacity: 1; } .tile-dl { opacity: 1; transform: none; } }
+    .tile-dl { transition: opacity .4s var(--ease), transform .4s var(--ease), background .3s; }
+
+    .tile-check { opacity: 0; transform: scale(.5); transition: all .35s var(--ease); }
+    .selecting .tile-check { opacity: 1; transform: scale(1); }
+    .selecting .tile-dl, .selecting .tile-shade { display: none; }
+    .tile.selected img.loaded, .tile.selected:hover img.loaded { transform: scale(.92); border-radius: 12px; border: 2px solid #74906B; }
+    .tile.selected .tile-check { background: linear-gradient(to right, #74906B, #4A6444); border-color: transparent; color: #fff; transform: scale(1.1); box-shadow: 0 4px 12px rgba(116,144,107,0.4); }
+    .tile.selected { background: #E1E8D8; }
+
+    .shimmer { background: linear-gradient(100deg, rgba(225,232,216,0.5) 30%, rgba(251,252,250,0.8) 50%, rgba(225,232,216,0.5) 70%); background-size: 220% 100%; animation: shimmer 1.6s linear infinite; transition: opacity .6s; }
+    .shimmer.done { animation: none; opacity: 0; }
+    @keyframes shimmer { to { background-position: -220% 0; } }
+
+    #lightbox { opacity: 0; visibility: hidden; transition: opacity .45s var(--ease), visibility .45s; }
+    #lightbox.open { opacity: 1; visibility: visible; }
+    #lb-img { transition: opacity .35s var(--ease), transform .6s var(--ease); }
+    #lightbox:not(.open) #lb-img { transform: scale(.94); }
+    #lb-img.swap { opacity: 0; transform: scale(.97); }
+
+    #action-bar { transform: translateY(140%); transition: transform .55s var(--ease); }
+    #action-bar.show { transform: none; }
+    .sheet { opacity: 0; visibility: hidden; transition: opacity .35s var(--ease), visibility .35s; }
+    .sheet.open { opacity: 1; visibility: visible; }
+    .sheet-panel { transform: translateY(40px); transition: transform .5s var(--ease); }
+    .sheet.open .sheet-panel { transform: none; }
+
+    .face-guide { border: 2px dashed rgba(116,144,107,0.6); border-radius: 40px; box-shadow: 0 0 0 9999px rgba(15,21,17,.7); animation: breathe 3s ease-in-out infinite; }
+    @keyframes breathe { 50% { transform: scale(1.03); border-color: rgba(116,144,107,1); box-shadow: 0 0 0 9999px rgba(15,21,17,.85); } }
+
+    #toast { transition: opacity .35s var(--ease), transform .35s var(--ease); }
+    #toast.hide { opacity: 0; transform: translate(-50%, 16px); pointer-events: none; }
+    .no-scrollbar::-webkit-scrollbar { display: none; } .no-scrollbar { scrollbar-width: none; }
+    @media (prefers-reduced-motion: reduce) {
+        *, *::before, *::after { animation-duration: .001ms !important; animation-delay: 0ms !important; transition-duration: .001ms !important; transition-delay: 0ms !important; }
+    }
+</style>
+</head>
+
+<body class="font-sans">
+
+<div id="progress" class="fixed top-0 left-0 h-1 bg-gradient-to-r from-gold-light via-gold to-gold-dark z-[100] transition-all duration-500 opacity-0 rounded-r-full shadow-[0_0_10px_rgba(116,144,107,0.8)]" style="width:0"></div>
+
+<!-- ============================== GUEST ============================== -->
+<div id="app-guest" class="min-h-screen flex flex-col relative">
+
+    <div class="sticky top-2 sm:top-5 z-40 mx-2 sm:mx-8 max-w-6xl xl:mx-auto">
+        <nav class="bg-white/60 backdrop-blur-2xl border border-white shadow-soft rounded-full px-3 sm:px-5 h-14 sm:h-16 flex items-center justify-between relative overflow-hidden">
+            <div class="absolute inset-0 bg-gradient-to-r from-gold/5 via-transparent to-gold/5 pointer-events-none"></div>
+            <button onclick="showView('view-gallery')" class="flex items-center gap-2 sm:gap-3 group relative z-10">
+                <span class="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-gold/10 to-gold/30 border border-gold/30 text-gold-dark flex items-center justify-center group-hover:from-gold group-hover:to-gold-dark group-hover:text-white transition-all duration-500 shadow-sm">
+                    <i class="fa-solid fa-camera-retro text-[10px] sm:text-sm"></i>
+                </span>
+                <span class="font-display text-lg sm:text-2xl font-bold tracking-wider">
+                    Toy Gallery <span class="text-luxury ml-0.5 sm:ml-1 hidden sm:inline">2000's</span>
+                </span>
+            </button>
+            <div class="flex items-center gap-1 sm:gap-2 relative z-10">
+                <button onclick="showView('view-gallery')" class="hidden sm:inline-flex btn-ghost border-transparent bg-transparent shadow-none hover:bg-gold/10">Gallery</button>
+                <button onclick="showView('view-scan')" class="btn-primary h-8 sm:h-10 px-3 sm:px-6 text-[12px] sm:text-[13px]">
+                    <i class="fa-regular fa-face-smile"></i><span class="hidden sm:inline">Find Me</span>
+                </button>
+                <button onclick="openAdmin()" class="btn-icon w-8 h-8 sm:w-10 sm:h-10" aria-label="Admin"><i class="fa-solid fa-lock text-[10px] sm:text-xs"></i></button>
+            </div>
+        </nav>
+    </div>
+
+    <main id="guest-main" class="flex-1 w-full max-w-6xl mx-auto px-3 sm:px-8 transition-[padding] duration-500 pb-16 mt-2 sm:mt-4">
+
+        <!-- VIEW: GALLERY -->
+        <section id="view-gallery" class="guest-view">
+            <header class="grid md:grid-cols-[1fr_auto] gap-6 sm:gap-10 items-end pt-6 sm:pt-16 pb-8 sm:pb-20">
+                <div class="min-w-0 text-center sm:text-left">
+                    <p class="rise eyebrow flex items-center justify-center sm:justify-start gap-2 sm:gap-3" style="--d:0ms">
+                        <span class="w-6 sm:w-8 h-[1px] bg-gradient-to-r from-gold to-transparent hidden sm:block"></span>
+                        <span id="gallery-name">Event Gallery</span>
+                    </p>
+                    <h1 id="album-title" class="rise mt-2 sm:mt-4 font-display text-4xl sm:text-7xl font-bold tracking-tight break-words text-luxury" style="--d:80ms">Loading</h1>
+                    <div class="rise mt-3 sm:mt-6" style="--d:160ms">
+                        <p class="font-sans text-sm sm:text-xl text-muted font-light">สแกนเพื่อรับรูป</p>
+                    </div>
+                    <div class="rise mt-4 sm:mt-8 inline-flex items-center gap-2 px-4 sm:px-5 py-2 sm:py-2.5 rounded-full bg-white/50 backdrop-blur-sm border border-gold/20 shadow-sm text-[12px] sm:text-[13px] text-ink/80 mx-auto sm:mx-0" style="--d:240ms">
+                        <span id="sync-dot" class="w-2 h-2 rounded-full bg-stone-300"></span>
+                        <span id="status-label">Connecting…</span>
+                    </div>
+                </div>
+
+                <div class="rise hidden md:block relative group" style="--d:220ms">
+                    <div class="absolute -inset-1 bg-gradient-to-r from-gold-light via-gold to-gold-dark rounded-[2rem] blur opacity-25 group-hover:opacity-50 transition duration-1000"></div>
+                    <div class="card p-6 w-52 text-center bg-white/90 relative">
+                        <div class="rounded-2xl overflow-hidden border border-gold/20 p-2 bg-white">
+                            <img id="qr-img" alt="QR code" class="w-full h-auto aspect-square object-contain">
+                        </div>
+                        <p class="mt-5 font-sans text-[11px] uppercase tracking-widest text-gold-dark font-medium">Scan with phone</p>
+                    </div>
+                </div>
+
+                <button onclick="shareGallery()" class="rise md:hidden btn-ghost w-full h-10 sm:h-12 bg-white/60 rounded-xl sm:rounded-2xl mt-4" style="--d:300ms">
+                    <i class="fa-solid fa-arrow-up-from-bracket text-sm"></i> Share this album
+                </button>
+            </header>
+
+            <div class="sticky top-[4.5rem] sm:top-[5.5rem] z-20 -mx-3 sm:-mx-8 px-3 sm:px-8 py-3 sm:py-4 mb-4 sm:mb-8 flex items-center justify-between backdrop-blur-2xl bg-cream/70 border-b border-gold/10">
+                <div class="flex items-baseline gap-2 sm:gap-3">
+                    <h2 class="font-display text-xl sm:text-3xl text-ink font-bold">All Photos</h2>
+                    <span id="photo-count" class="hidden text-[11px] sm:text-[13px] text-gold-dark font-medium bg-gold/10 border border-gold/20 px-2 sm:px-3 py-0.5 rounded-full"></span>
+                </div>
+                <div class="flex items-center gap-1 sm:gap-2">
+                    <button id="btn-select-all" onclick="selectAll()" class="hidden btn-ghost h-8 sm:h-10 fade-in bg-white/80 text-[12px] sm:text-[13px] px-3 sm:px-5">Select all</button>
+                    <button id="btn-select" onclick="setSelectMode(!selecting)" class="btn-ghost h-8 sm:h-10 bg-white/80 border-gold/30 text-gold-dark text-[12px] sm:text-[13px] px-3 sm:px-5" disabled>
+                        <i class="fa-regular fa-square-check"></i><span>Select</span>
+                    </button>
+                </div>
+            </div>
+
+            <div id="gallery-grid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-6"></div>
+        </section>
+
+        <!-- VIEW: FACE SCAN -->
+        <section id="view-scan" class="guest-view hidden py-4 sm:py-16">
+            <div class="max-w-2xl mx-auto card p-4 sm:p-8 bg-white/40">
+                <div class="flex items-start justify-between mb-6 sm:mb-8 px-2 sm:px-0">
+                    <div>
+                        <p class="eyebrow rise">Face Search</p>
+                        <h1 class="rise font-display text-3xl sm:text-5xl tracking-tight mt-1 sm:mt-2 font-bold text-luxury" style="--d:80ms">Find your photos</h1>
+                        <p class="rise text-[13px] sm:text-[15px] text-muted mt-2 sm:mt-3 font-light" style="--d:160ms">Position your face inside the frame.</p>
+                    </div>
+                    <button onclick="showView('view-gallery')" class="btn-icon bg-white/80 shadow-sm border border-gold/20 w-8 h-8 sm:w-10 sm:h-10" aria-label="Close"><i class="fa-solid fa-xmark text-xs sm:text-base"></i></button>
+                </div>
+                <div class="rise relative w-full aspect-[3/4] sm:aspect-[4/3] bg-ink rounded-2xl sm:rounded-[2rem] overflow-hidden flex items-center justify-center shadow-2xl border border-gold/20" style="--d:200ms">
+                    <video id="camera" autoplay playsinline muted class="absolute inset-0 w-full h-full object-cover -scale-x-100 opacity-90"></video>
+                    <div class="face-guide relative z-10 w-48 h-64 sm:w-64 sm:h-80"></div>
+                    <div id="camera-error" class="hidden absolute inset-0 z-20 bg-ink/95 backdrop-blur-xl text-cream flex-col items-center justify-center text-center p-6 sm:p-8">
+                        <div class="w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-red-500/20 flex items-center justify-center mb-3 sm:mb-4 text-red-400 border border-red-500/30">
+                            <i class="fa-solid fa-video-slash text-xl sm:text-2xl"></i>
+                        </div>
+                        <p class="font-display text-xl sm:text-2xl mb-1 sm:mb-2 font-bold">Camera unavailable</p>
+                        <p class="text-[12px] sm:text-[13px] text-cream/70 font-light max-w-xs">Please allow camera access in your browser settings to use face search.</p>
+                    </div>
+                </div>
+                <div class="flex justify-center mt-6 sm:mt-10">
+                    <button onclick="capture()" class="btn-primary w-full sm:w-auto h-12 sm:h-14 px-8 sm:px-12 text-[14px] sm:text-[15px] rounded-xl sm:rounded-[1.25rem] shadow-gold-glow"><i class="fa-solid fa-camera"></i> Take photo</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- VIEW: RESULT -->
+        <section id="view-result" class="guest-view hidden py-4 sm:py-16">
+            <div class="grid lg:grid-cols-[300px_1fr] gap-6 sm:gap-8 lg:gap-14">
+                <aside class="card p-6 sm:p-8 text-center lg:sticky lg:top-32 h-max rise bg-white/60">
+                    <div class="relative w-24 h-24 sm:w-32 sm:h-32 mx-auto mb-4 sm:mb-6">
+                        <div class="absolute inset-0 rounded-full border-2 border-gold animate-ping opacity-30"></div>
+                        <img id="profile-img" alt="" class="relative w-full h-full rounded-full object-cover bg-sand ring-4 ring-white shadow-xl">
+                    </div>
+                    <p class="font-display text-2xl sm:text-3xl font-bold text-luxury">Search complete</p>
+                    <p class="text-[12px] sm:text-[13px] text-muted mt-1 sm:mt-2 px-2 sm:px-4 leading-relaxed font-light">Demo mode · face matching not connected</p>
+                    <button onclick="showView('view-scan')" class="btn-ghost w-full mt-6 sm:mt-8 bg-white/80 border-gold/30"><i class="fa-solid fa-rotate-right"></i> Try again</button>
+                </aside>
+                <div>
+                    <div class="flex flex-col sm:flex-row items-start sm:items-end justify-between mb-6 sm:mb-8 gap-4 border-b border-gold/20 pb-4 sm:pb-6">
+                        <div>
+                            <p class="eyebrow hidden sm:block">Results</p>
+                            <h2 class="font-display text-3xl sm:text-4xl mt-1 sm:mt-2 text-ink font-bold">Your photos</h2>
+                        </div>
+                        <button id="btn-dl-results" onclick="downloadPhotos(resultList)" class="btn-primary w-full sm:w-auto px-6"><i class="fa-solid fa-arrow-down"></i> Download all</button>
+                    </div>
+                    <div id="result-grid" class="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-6"></div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="py-8 sm:py-10 text-center pb-24 border-t border-gold/10 mt-6 sm:mt-10">
+        <p class="font-display text-lg sm:text-xl text-gold-dark font-bold tracking-wider">Toy Gallery 2000's</p>
+        <p class="font-sans text-[10px] sm:text-[11px] mt-1.5 sm:mt-2 text-muted uppercase tracking-widest">Captured with care</p>
+    </footer>
+</div>
+
+<!-- BACK TO TOP -->
+<button id="btn-back-to-top" onclick="window.scrollTo({top: 0, behavior: 'smooth'})"
+        class="fixed bottom-6 right-4 sm:bottom-8 sm:right-6 z-40 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white/80 backdrop-blur-xl border border-gold/30 text-gold-dark shadow-gold-glow flex items-center justify-center opacity-0 pointer-events-none transition-all duration-300 hover:scale-110 active:scale-95" aria-label="Back to top">
+    <i class="fa-solid fa-arrow-up text-xs sm:text-sm"></i>
+</button>
+
+<!-- SELECTION ACTION BAR -->
+<div id="action-bar" class="fixed inset-x-0 bottom-0 z-50 px-2 sm:px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pointer-events-none">
+    <div class="pointer-events-auto mx-auto max-w-lg bg-[#151D18]/95 backdrop-blur-xl text-cream rounded-[1.5rem] sm:rounded-[2rem] pl-5 sm:pl-7 pr-2 sm:pr-3 h-16 sm:h-20 flex items-center gap-3 sm:gap-4 shadow-2xl border border-gold/20">
+        <div class="flex-1 min-w-0">
+            <p id="sel-count" class="font-display text-xl sm:text-2xl leading-none text-gold-light font-bold">0 selected</p>
+            <p id="sel-hint" class="text-[10px] sm:text-[12px] text-cream/60 mt-1 font-light hidden sm:block">Tap photos to select</p>
+        </div>
+        <button onclick="clearSelection()" class="w-10 h-10 sm:w-12 sm:h-12 rounded-full hover:bg-white/10 transition flex items-center justify-center text-cream/80 hover:text-white" aria-label="Clear"><i class="fa-solid fa-xmark"></i></button>
+        <button id="dl-btn" onclick="downloadSelected()" class="inline-flex items-center gap-1.5 sm:gap-2 h-12 sm:h-14 px-5 sm:px-7 rounded-xl sm:rounded-[1.25rem] bg-gradient-to-r from-[#74906B] to-[#4A6444] text-white text-[12px] sm:text-[14px] font-medium hover:from-[#65815C] hover:to-[#3C5337] transition-all active:scale-95 disabled:opacity-40 shadow-gold-glow" disabled>
+            <i class="fa-solid fa-arrow-down text-xs sm:text-sm"></i> Download
+        </button>
+    </div>
+</div>
+
+<!-- LIGHTBOX -->
+<div id="lightbox" class="fixed inset-0 z-[100] bg-[#0F1511]/95 backdrop-blur-2xl flex flex-col">
+    <div class="flex items-center justify-between px-3 sm:px-8 h-16 sm:h-20 text-cream">
+        <span id="lb-counter" class="font-display text-lg sm:text-xl tracking-widest text-gold-light ml-2"></span>
+        <button onclick="closeLightbox()" class="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white/10 hover:bg-white/20 transition flex items-center justify-center" aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div id="lb-stage" class="flex-1 relative flex items-center justify-center px-1 sm:px-24 min-h-0">
+        <button onclick="stepLightbox(-1)" class="hidden sm:flex absolute left-8 w-14 h-14 rounded-full border border-gold/30 hover:bg-gold/20 text-gold-light items-center justify-center transition"><i class="fa-solid fa-chevron-left"></i></button>
+        <img id="lb-img" alt="" class="max-h-full max-w-full object-contain rounded-lg sm:rounded-2xl shadow-2xl ring-1 ring-gold/20">
+        <button onclick="stepLightbox(1)" class="hidden sm:flex absolute right-8 w-14 h-14 rounded-full border border-gold/30 hover:bg-gold/20 text-gold-light items-center justify-center transition"><i class="fa-solid fa-chevron-right"></i></button>
+    </div>
+    <div class="p-4 sm:p-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] flex flex-col items-center gap-2 sm:gap-3">
+        <button id="lb-download" onclick="downloadPhotos([photos[lbIndex]])" class="inline-flex items-center justify-center gap-2 h-12 sm:h-14 w-full sm:w-auto px-8 sm:px-12 rounded-xl sm:rounded-[1.25rem] bg-gradient-to-r from-[#74906B] to-[#4A6444] text-white text-[13px] sm:text-[14px] font-medium hover:from-[#65815C] hover:to-[#3C5337] transition active:scale-95 disabled:opacity-50 shadow-gold-glow">
+            <i class="fa-solid fa-arrow-down"></i> Download photo
+        </button>
+        <p class="text-[11px] sm:text-[12px] text-cream/50 font-light">If download doesn't start, long-press the photo to save it.</p>
+    </div>
+</div>
+
+<!-- READY-TO-SAVE SHEET -->
+<div id="ready-sheet" class="sheet fixed inset-0 z-[110] flex items-end sm:items-center justify-center bg-[#1F2A22]/70 backdrop-blur-lg p-0 sm:p-4" onclick="if(event.target===this)closeSheet()">
+    <div class="sheet-panel w-full sm:max-w-sm bg-white rounded-t-[2rem] sm:rounded-[2.5rem] p-6 sm:p-8 pb-[max(2rem,env(safe-area-inset-bottom))] text-center shadow-2xl border border-gold/20">
+        <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-br from-gold/20 to-gold/5 border border-gold/30 text-gold-dark flex items-center justify-center mx-auto mb-4 sm:mb-6">
+            <i class="fa-solid fa-check text-xl sm:text-2xl"></i>
+        </div>
+        <h3 class="font-display text-3xl sm:text-4xl text-ink font-bold">Ready to save</h3>
+        <p id="ready-count" class="text-[14px] sm:text-[15px] text-muted mt-1 sm:mt-2 font-light"></p>
+        <button onclick="shareReady()" class="btn-primary w-full h-12 sm:h-14 mt-6 sm:mt-8 rounded-xl sm:rounded-[1.25rem]"><i class="fa-solid fa-download"></i> Save to Photos</button>
+        <button onclick="closeSheet()" class="w-full h-10 sm:h-12 mt-2 sm:mt-3 text-[13px] sm:text-[14px] text-muted hover:text-gold-dark transition font-medium">Cancel</button>
+    </div>
+</div>
+
+<div id="toast" class="hide fixed bottom-24 left-1/2 -translate-x-1/2 z-[120] bg-[#1F2A22]/90 backdrop-blur-xl text-gold-light text-[12px] sm:text-[13px] font-medium px-5 sm:px-7 py-3 sm:py-4 rounded-full shadow-2xl w-max max-w-[calc(100vw-2rem)] text-center border border-gold/30"></div>
+
+<!-- ============================== ADMIN ============================== -->
+<div id="app-admin" class="hidden min-h-screen">
+
+    <!-- LOGIN -->
+    <div id="login-screen" class="min-h-screen flex items-center justify-center p-4">
+        <div class="w-full max-w-sm rise">
+            <div class="text-center mb-8 sm:mb-10">
+                <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-white/80 border border-gold/40 shadow-gold-glow text-gold-dark flex items-center justify-center mx-auto mb-4 sm:mb-6">
+                    <i class="fa-solid fa-camera-retro text-lg sm:text-xl"></i>
+                </div>
+                <h1 class="font-display text-4xl sm:text-5xl font-bold text-luxury mb-1 sm:mb-2">Welcome</h1>
+                <p class="text-[14px] sm:text-[15px] text-muted font-light">Sign in to manage your gallery</p>
+            </div>
+            <form id="login-form" class="card p-6 sm:p-8 space-y-4 sm:space-y-5" novalidate>
+                <div>
+                    <label for="login-email" class="label">Email address</label>
+                    <input id="login-email" type="email" autocomplete="username" placeholder="you@example.com" class="input bg-white/50">
+                </div>
+                <div>
+                    <label for="login-password" class="label">Password</label>
+                    <div class="relative">
+                        <input id="login-password" type="password" autocomplete="current-password" placeholder="••••••••" class="input bg-white/50 pr-12">
+                        <button type="button" onclick="togglePassword()" class="absolute right-2 top-1/2 -translate-y-1/2 btn-icon w-10 h-10 hover:bg-transparent" aria-label="Show password"><i id="pw-eye" class="fa-regular fa-eye text-gold-dark"></i></button>
+                    </div>
+                </div>
+                <p id="login-error" class="hidden text-[12px] sm:text-[13px] text-red-600 bg-red-50 border border-red-100 rounded-xl px-4 py-3 font-medium"></p>
+                <button id="login-btn" type="submit" class="btn-primary w-full h-11 sm:h-12 rounded-xl sm:rounded-[1.25rem]">Sign in</button>
+            </form>
+            <p class="text-center text-[12px] text-muted mt-5">Need an account? Ask the system admin to create one.</p>
+            <button onclick="exitAdmin(false)" class="w-full mt-4 text-[13px] sm:text-[14px] text-muted hover:text-gold-dark transition flex items-center justify-center gap-2 font-medium">
+                <i class="fa-solid fa-arrow-left text-[10px] sm:text-xs"></i> Back to gallery
+            </button>
+        </div>
+    </div>
+
+    <!-- SHELL -->
+    <div id="admin-shell" class="hidden min-h-screen md:flex">
+        <aside class="hidden md:flex w-72 shrink-0 flex-col bg-white/80 backdrop-blur-xl border-r border-gold/20 h-screen sticky top-0 shadow-lg">
+            <div class="h-20 px-8 flex items-center gap-4 border-b border-gold/20">
+                <span class="w-10 h-10 rounded-xl bg-gradient-to-br from-gold/10 to-gold/30 border border-gold/30 text-gold-dark flex items-center justify-center"><i class="fa-solid fa-camera-retro"></i></span>
+                <span class="font-display text-2xl font-bold text-luxury">Toy Gallery</span>
+            </div>
+            <nav class="flex-1 p-4 space-y-1.5 mt-2">
+                <p class="eyebrow px-4 pt-2 pb-3 opacity-80">Management</p>
+                <button data-tab="dashboard" onclick="switchTab('dashboard')" class="admin-tab w-full"><i class="fa-solid fa-chart-simple w-5"></i> Overview</button>
+                <button data-tab="albums" onclick="switchTab('albums')" class="admin-tab w-full"><i class="fa-regular fa-folder w-5"></i> Albums</button>
+                <button data-tab="account" onclick="switchTab('account')" class="admin-tab w-full"><i class="fa-regular fa-user w-5"></i> My account</button>
+                <button data-tab="accounts" data-super onclick="switchTab('accounts')" class="admin-tab w-full hidden"><i class="fa-solid fa-users-gear w-5"></i> Accounts</button>
+            </nav>
+            <div class="p-4 border-t border-gold/20 space-y-1.5 bg-white/50">
+                <div class="px-4 py-2">
+                    <p id="admin-name" class="text-[14px] font-medium truncate"></p>
+                    <p id="admin-email" class="text-[11px] font-mono text-muted truncate"></p>
+                    <span id="admin-role" class="chip mt-2 bg-gold/10 border-gold/30 text-gold-dark"></span>
+                </div>
+                <button onclick="exitAdmin(true)" class="admin-tab w-full bg-white/80 border border-gold/10"><i class="fa-solid fa-globe w-5"></i> View gallery</button>
+                <button onclick="logout()" class="admin-tab w-full bg-white/80 hover:!text-red-600"><i class="fa-solid fa-arrow-right-from-bracket w-5"></i> Sign out</button>
+            </div>
+        </aside>
+
+        <div class="flex-1 min-w-0">
+            <header class="sticky top-0 z-20 bg-white/80 backdrop-blur-2xl border-b border-gold/20 md:hidden shadow-sm">
+                <div class="h-14 px-4 flex items-center justify-between">
+                    <h2 id="admin-title-mobile" class="font-display text-xl font-bold text-luxury">Albums</h2>
+                    <div class="flex items-center gap-1">
+                        <button onclick="exitAdmin(true)" class="btn-icon w-8 h-8 bg-gold/10 border border-gold/20 text-gold-dark" aria-label="View gallery"><i class="fa-solid fa-globe text-xs"></i></button>
+                        <button onclick="logout()" class="btn-icon w-8 h-8 bg-gold/10 border border-gold/20 text-gold-dark" aria-label="Sign out"><i class="fa-solid fa-arrow-right-from-bracket text-xs"></i></button>
+                    </div>
+                </div>
+                <nav class="flex gap-2 px-4 pb-3 overflow-x-auto no-scrollbar">
+                    <button data-tab="dashboard" onclick="switchTab('dashboard')" class="admin-tab bg-white/60 border border-gold/10 h-9 text-[12px]"><i class="fa-solid fa-chart-simple"></i> Overview</button>
+                    <button data-tab="albums" onclick="switchTab('albums')" class="admin-tab bg-white/60 border border-gold/10 h-9 text-[12px]"><i class="fa-regular fa-folder"></i> Albums</button>
+                    <button data-tab="account" onclick="switchTab('account')" class="admin-tab bg-white/60 border border-gold/10 h-9 text-[12px]"><i class="fa-regular fa-user"></i> Account</button>
+                    <button data-tab="accounts" data-super onclick="switchTab('accounts')" class="admin-tab bg-white/60 border border-gold/10 h-9 text-[12px] hidden"><i class="fa-solid fa-users-gear"></i> Accounts</button>
+                </nav>
+            </header>
+
+            <main class="p-4 sm:p-5 md:p-10 max-w-5xl mx-auto">
+                <h2 id="admin-title" class="hidden md:block font-display text-4xl font-bold text-luxury mb-8 mt-2">Albums</h2>
+
+                <!-- OVERVIEW -->
+                <section id="tab-dashboard" class="admin-section hidden space-y-4 sm:space-y-6">
+                    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
+                        <div class="card p-5 sm:p-7 rise"><p class="eyebrow">Albums</p><p id="stat-albums" class="font-display text-4xl sm:text-5xl font-bold mt-2 sm:mt-4">0</p></div>
+                        <div class="card p-5 sm:p-7 rise" style="--d:80ms"><p class="eyebrow">Photos live</p><p id="stat-photos" class="font-display text-4xl sm:text-5xl font-bold mt-2 sm:mt-4">–</p></div>
+                        <div class="card p-5 sm:p-7 min-w-0 rise bg-gradient-to-br from-[#74906B] to-[#4A6444] text-white border-none shadow-gold-glow" style="--d:160ms">
+                            <p class="text-[10px] sm:text-[11px] uppercase tracking-[0.25em] font-medium text-white/80">Live album</p>
+                            <p id="stat-active" class="font-display text-xl sm:text-2xl font-bold mt-3 sm:mt-5 truncate">–</p>
+                        </div>
+                        <div data-super class="card p-5 sm:p-7 rise hidden" style="--d:240ms"><p class="eyebrow">Accounts</p><p id="stat-accounts" class="font-display text-4xl sm:text-5xl font-bold mt-2 sm:mt-4">–</p></div>
+                    </div>
+                    <p id="stat-sync" class="text-[11px] sm:text-[13px] text-muted px-2 font-medium break-all"></p>
+                </section>
+
+                <!-- ALBUMS -->
+                <section id="tab-albums" class="admin-section hidden space-y-4 sm:space-y-8">
+                    <div id="manage-banner" class="hidden rounded-2xl border border-gold/40 bg-gold/10 p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center gap-3 justify-between">
+                        <p class="text-[13px] sm:text-sm"><i class="fa-solid fa-user-gear text-gold-dark mr-2"></i>Managing albums of <b id="manage-name"></b></p>
+                        <button onclick="stopManaging()" class="btn-ghost h-9 bg-white"><i class="fa-solid fa-arrow-left text-xs"></i> Back to my gallery</button>
+                    </div>
+
+                    <div class="card p-5 sm:p-8 rise bg-white/80">
+                        <h3 class="font-display text-2xl sm:text-3xl font-bold text-luxury">Add Drive folder</h3>
+                        <p class="text-[13px] sm:text-[14px] text-muted mt-1 sm:mt-2 mb-4 sm:mb-6 font-light max-w-2xl">Paste the folder link or ID. New folders go live immediately and replace the current album of this gallery. Share the folder as "Anyone with the link".</p>
+                        <form id="album-form" class="grid sm:grid-cols-[1fr_1.2fr_auto] gap-3 sm:gap-4 items-start" novalidate>
+                            <input id="album-name" type="text" placeholder="Album name" class="input bg-white">
+                            <input id="album-folder" type="text" placeholder="Folder link or ID" class="input font-mono text-[11px] sm:text-[13px] bg-sand/30">
+                            <button id="album-btn" type="submit" class="btn-primary h-11 sm:h-12 px-6 sm:px-8 rounded-xl sm:rounded-[1.25rem] w-full sm:w-auto"><i class="fa-solid fa-plus text-xs"></i> Add Album</button>
+                        </form>
+                    </div>
+
+                    <div class="card overflow-hidden rise bg-white/80" style="--d:80ms">
+                        <div class="px-5 sm:px-8 py-3 sm:py-5 border-b border-gold/20 flex flex-col sm:flex-row items-start sm:items-center justify-between bg-gold/5 gap-2">
+                            <h3 class="font-display text-xl sm:text-2xl font-bold">Albums</h3>
+                            <span class="chip bg-white/60 border-gold/30 text-gold-dark normal-case tracking-normal text-[11px]">One live at a time</span>
+                        </div>
+                        <div id="album-list" class="divide-y divide-gold/10"></div>
+                    </div>
+                </section>
+
+                <!-- MY ACCOUNT -->
+                <section id="tab-account" class="admin-section hidden space-y-4 sm:space-y-8">
+                    <div class="card p-5 sm:p-8 bg-white/80 grid sm:grid-cols-[auto_1fr] gap-6 items-center rise">
+                        <div class="rounded-2xl border border-gold/20 p-2 bg-white w-40 mx-auto"><img id="acc-qr" alt="Gallery QR code" class="w-full aspect-square"></div>
+                        <div class="min-w-0 text-center sm:text-left">
+                            <p class="eyebrow">Your gallery</p>
+                            <h3 id="acc-name" class="font-display text-2xl sm:text-3xl font-bold text-luxury mt-1 truncate max-w-full"></h3>
+                            <p id="acc-link" class="font-mono text-[11px] sm:text-[12px] text-muted mt-2 break-all"></p>
+                            <div class="flex flex-wrap justify-center sm:justify-start gap-2 mt-4">
+                                <button onclick="copyText(galleryUrl(session.slug))" class="btn-primary h-10"><i class="fa-regular fa-copy text-xs"></i> Copy link</button>
+                                <a id="acc-open" target="_blank" rel="noopener" class="btn-ghost"><i class="fa-solid fa-arrow-up-right-from-square text-xs"></i> Open</a>
+                                <a id="acc-qr-dl" target="_blank" rel="noopener" class="btn-ghost"><i class="fa-solid fa-qrcode text-xs"></i> QR for print</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card p-5 sm:p-8 bg-white/80 rise" style="--d:80ms">
+                        <h3 class="font-display text-2xl font-bold">Change password</h3>
+                        <p id="pw-super-note" class="hidden text-[13px] text-muted mt-3 font-light">The system admin password lives in <code class="font-mono text-gold-dark">CONFIG.SUPER_ADMIN</code>. Run <code class="font-mono text-gold-dark">hashPassword('new password')</code> in the browser Console and paste the result into <code class="font-mono text-gold-dark">passwordHash</code>.</p>
+                        <form id="pw-form" class="grid sm:grid-cols-3 gap-3 mt-4" novalidate>
+                            <input id="pw-current" type="password" autocomplete="current-password" placeholder="Current password" class="input bg-white">
+                            <input id="pw-new" type="password" autocomplete="new-password" placeholder="New password (6+)" class="input bg-white">
+                            <input id="pw-confirm" type="password" autocomplete="new-password" placeholder="Confirm new password" class="input bg-white">
+                            <button id="pw-btn" type="submit" class="btn-primary sm:col-span-3 sm:justify-self-start">Update password</button>
+                        </form>
+                    </div>
+                </section>
+
+                <!-- ACCOUNTS (system admin only) -->
+                <section id="tab-accounts" class="admin-section hidden space-y-4 sm:space-y-8">
+                    <div class="card p-5 sm:p-8 bg-white/80 rise">
+                        <h3 class="font-display text-2xl sm:text-3xl font-bold text-luxury">Create account</h3>
+                        <p class="text-[13px] sm:text-[14px] text-muted mt-1 sm:mt-2 mb-4 sm:mb-6 font-light">Each account gets its own gallery link and starts with no albums. Accounts cannot see each other's albums.</p>
+                        <form id="acct-form" class="grid sm:grid-cols-2 gap-3 sm:gap-4" novalidate>
+                            <input id="acct-name" type="text" placeholder="Name / gallery name" class="input bg-white">
+                            <div>
+                                <input id="acct-slug" type="text" placeholder="gallery-link (a-z, 0-9, -)" class="input bg-white font-mono text-[12px] sm:text-[13px]">
+                                <p id="acct-slug-preview" class="text-[11px] text-muted mt-1.5 ml-1 truncate"></p>
+                            </div>
+                            <input id="acct-email" type="email" autocomplete="off" placeholder="Email" class="input bg-white">
+                            <input id="acct-password" type="password" autocomplete="new-password" placeholder="Password (6+ characters)" class="input bg-white">
+                            <button id="acct-btn" type="submit" class="btn-primary sm:col-span-2 sm:justify-self-start"><i class="fa-solid fa-user-plus text-xs"></i> Create account</button>
+                        </form>
+                    </div>
+                    <div class="card overflow-hidden bg-white/80 rise" style="--d:80ms">
+                        <div class="px-5 sm:px-8 py-3 sm:py-5 border-b border-gold/20 flex items-center justify-between bg-gold/5">
+                            <h3 class="font-display text-xl sm:text-2xl font-bold">All accounts</h3>
+                            <span id="acct-count" class="text-[12px] text-muted"></span>
+                        </div>
+                        <div id="acct-list" class="divide-y divide-gold/10"></div>
+                    </div>
+                </section>
+            </main>
+        </div>
+    </div>
+</div>
+
+<!-- ============================== SCRIPT ============================== -->
+<script>
+/* -------------------- CONFIG -------------------- */
+const CONFIG = {
+    SITE_NAME: "Toy Gallery 2000's",
+    MAIN_SLUG: 'main',                       // แกลเลอรีของ System Admin (ลิงก์ที่ไม่มี ?g=)
+    GAS_API_URL: "https://script.google.com/macros/s/AKfycbyBLpMDiIIQ0PO7uqj0kK8HdHkLwCshrBQWHaCYqM9vLbFbTzUPiXeEVYlEX-J9V2ZKBQ/exec",
+    REFRESH_MS: 5000,
+    SESSION_HOURS: 10,
+    DOWNLOAD_CONCURRENCY: 10,
+    MAX_DOWNLOAD_WIDTH: 2048,
+    FIREBASE_CONFIG: {
+        apiKey: "AIzaSyC74s9gciHx68bAPNDue25wMCAhLiau8C0",
+        authDomain: "toy-gallery-2000s-4ea89.firebaseapp.com",
+        databaseURL: "https://toy-gallery-2000s-4ea89-default-rtdb.asia-southeast1.firebasedatabase.app/",
+        projectId: "toy-gallery-2000s-4ea89",
+        storageBucket: "toy-gallery-2000s-4ea89.firebasestorage.app",
+        messagingSenderId: "712072738636",
+        appId: "1:712072738636:web:26cf6c0200fc1ddcc641e9",
+        measurementId: "G-S7JX8BPJS6"
+    },
+    // บัญชีจัดการระบบใหญ่ (มีได้ 1 บัญชี) — passwordHash ด้านล่างคือรหัส "admin" ควรเปลี่ยนก่อนใช้งานจริง
+    SUPER_ADMIN: {
+        email: "admin@toygallery.com",
+        passwordHash: "8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918"
+    }
+};
+
+const DEMO_MODE = !CONFIG.GAS_API_URL || CONFIG.GAS_API_URL.includes('xxxx');
+const IS_TOUCH = matchMedia('(pointer: coarse)').matches;
+const SESSION_KEY = 'tg_session_v4';
+let db = null;
+
+if (String(CONFIG.FIREBASE_CONFIG?.apiKey || '').startsWith('AIza')) {
+    try {
+        firebase.initializeApp(CONFIG.FIREBASE_CONFIG);
+        db = firebase.database();
+    } catch (e) { console.error('Firebase Init Error:', e); }
+} else {
+    console.warn('Firebase apiKey is missing. Multi-account features are disabled.');
+}
+
+/* -------------------- HELPERS -------------------- */
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const keyOf = p => p.id || p.url;
+const plural = (n, w) => `${n} ${w}${n === 1 ? '' : 's'}`;
+const pad = n => String(n).padStart(2, '0');
+const slug = s => String(s || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'photos';
+const slugify = s => String(s || '').toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 40);
+const galleryUrl = s => `${location.origin}${location.pathname}${s && s !== CONFIG.MAIN_SLUG ? `?g=${encodeURIComponent(s)}` : ''}`;
+const qrSrc = (url, size = 400) => `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&margin=0&color=1F2A22&bgcolor=ffffff&data=${encodeURIComponent(url)}`;
+const LOADING_ROW = '<p class="px-6 py-12 text-center text-sm text-muted"><i class="fa-solid fa-circle-notch fa-spin mr-2"></i>Loading…</p>';
+const NO_FIREBASE = '<p class="px-6 py-12 text-center text-sm text-red-600">Firebase is not configured. Add your real apiKey in CONFIG.FIREBASE_CONFIG.</p>';
+
+function normalizeAlbums(v) {
+    const list = Array.isArray(v) ? v.filter(Boolean) : (v ? Object.values(v) : []);
+    let found = false;
+    return list.map(a => {
+        const live = !!a.isActive && !found;
+        if (live) found = true;
+        return { ...a, isActive: live };
+    });
+}
+
+let toastTimer;
+function toast(msg) {
+    const t = $('toast');
+    t.textContent = msg;
+    t.classList.remove('hide');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.add('hide'), 2800);
+}
+async function copyText(text, msg = 'Link copied') {
+    try { await navigator.clipboard.writeText(text); toast(msg); }
+    catch (e) { prompt('Copy this link:', text); }
+}
+function setBusy(btn, on, label) {
+    if (on) { btn.dataset.label = btn.innerHTML; btn.disabled = true; btn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin text-xs"></i> ${label || 'Saving…'}`; }
+    else { btn.disabled = false; if (btn.dataset.label) btn.innerHTML = btn.dataset.label; }
+}
+async function sha256(text) {
+    const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
+    return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, '0')).join('');
+}
+window.hashPassword = async pw => console.log(await sha256(pw));
+const memberHash = (id, pw) => sha256(`${id}:${pw}`);
+
+window.addEventListener('scroll', () => {
+    const btn = $('btn-back-to-top');
+    const show = window.scrollY > 300 && !selecting;
+    btn.classList.toggle('opacity-0', !show);
+    btn.classList.toggle('pointer-events-none', !show);
+}, { passive: true });
+
+/* -------------------- GUEST STATE -------------------- */
+let gallerySlug = slugify(new URLSearchParams(location.search).get('g')) || CONFIG.MAIN_SLUG;
+let galleryRef = null, galleryLoaded = false, galleryMissing = false, galleryName = '';
+let albums = [];
+let photos = [], lastSignature = null, lastSync = null, pollTimer = null, initialized = false, fetchSeq = 0;
+let stream = null, lbIndex = 0, selecting = false, busy = false, readyFiles = [], resultList = [];
+const selected = new Set(), revealed = new Set(), loadedSet = new Set();
+const DEFAULT_LABELS = {};
+const SKELETON = '<div class="aspect-[4/5] rounded-xl sm:rounded-2xl shimmer"></div>'.repeat(4);
+const activeAlbum = () => albums.find(a => a.isActive);
+
+function subscribeGallery() {
+    if (galleryRef) { galleryRef.off(); galleryRef = null; }
+    galleryLoaded = false; galleryMissing = false; galleryName = ''; albums = [];
+    resetGallery();
+    if (!db) { galleryLoaded = true; fetchPhotos(); return; }
+
+    galleryRef = db.ref(`galleries/${gallerySlug}`);
+    galleryRef.on('value', snap => {
+        const g = snap.val();
+        const prevFolder = activeAlbum()?.folderId;
+        const first = !galleryLoaded;
+        galleryLoaded = true;
+        galleryMissing = !g && gallerySlug !== CONFIG.MAIN_SLUG;
+        galleryName = g?.name || (gallerySlug === CONFIG.MAIN_SLUG ? CONFIG.SITE_NAME : '');
+        albums = normalizeAlbums(g?.albums);
+        if (first || activeAlbum()?.folderId !== prevFolder) resetGallery();
+        else renderHeader();
+    }, err => {
+        console.error(err);
+        galleryLoaded = true;
+        setStatus('Database error · ' + err.message, 'error');
+    });
+}
+
+function switchGallery(s) {
+    gallerySlug = s || CONFIG.MAIN_SLUG;
+    history.replaceState(null, '', galleryUrl(gallerySlug));
+    subscribeGallery();
+}
+
+function resetGallery() {
+    fetchSeq++;
+    photos = []; resultList = [];
+    lastSignature = null; lastSync = null; initialized = false;
+    selected.clear(); revealed.clear(); loadedSet.clear();
+    if (selecting) setSelectMode(false);
+    $('gallery-grid').innerHTML = SKELETON;
+    $('photo-count').classList.add('hidden');
+    $('btn-select').disabled = true;
+    renderHeader();
+    fetchPhotos();
+}
+
+/* -------------------- VIEWS -------------------- */
+function showView(id) {
+    document.querySelectorAll('.guest-view').forEach(v => v.classList.add('hidden'));
+    $(id).classList.remove('hidden');
+    if (id !== 'view-gallery') setSelectMode(false);
+    id === 'view-scan' ? startCamera() : stopCamera();
+    id === 'view-gallery' ? startPolling() : stopPolling();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function renderHeader() {
+    const a = activeAlbum();
+    $('album-title').textContent = galleryMissing ? 'Gallery not found' : (!galleryLoaded ? 'Loading' : (a ? a.name : 'No album yet'));
+    $('gallery-name').textContent = galleryName || 'Event Gallery';
+    document.title = a ? `${a.name} · ${galleryName || CONFIG.SITE_NAME}` : (galleryName || CONFIG.SITE_NAME);
+    const url = galleryUrl(gallerySlug);
+    const qr = $('qr-img');
+    if (qr.dataset.url !== url) { qr.src = qrSrc(url); qr.dataset.url = url; }
+}
+
+function setStatus(text, state) {
+    $('status-label').textContent = text;
+    const colors = { live: 'bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.6)]', error: 'bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.6)]', idle: 'bg-gold' };
+    $('sync-dot').className = `w-2 h-2 rounded-full ${colors[state] || colors.idle}`;
+}
+
+/* -------------------- DATA -------------------- */
+function startPolling() {
+    fetchPhotos();
+    clearInterval(pollTimer);
+    pollTimer = setInterval(fetchPhotos, CONFIG.REFRESH_MS);
+}
+function stopPolling() { clearInterval(pollTimer); pollTimer = null; }
+
+function demoPhotos(seed = 'demo') {
+    const s = String(seed).slice(0, 10);
+    return Array.from({ length: 12 }, (_, i) => {
+        const base = `https://picsum.photos/seed/${s}-${i}`;
+        return { id: `demo-${s}-${i}`, name: `toy-gallery-${pad(i + 1)}.jpg`, thumb: `${base}/600/750`, url: `${base}/1200/1500`, downloadUrl: `${base}/1200/1500` };
+    });
+}
+
+async function fetchPhotos() {
+    if (!db) { applyPhotos([]); setStatus('Firebase not configured', 'error'); return; }
+    if (!galleryLoaded) return;
+    if (galleryMissing) { applyPhotos([]); setStatus('Gallery not found', 'error'); return; }
+
+    const a = activeAlbum();
+    const seq = fetchSeq;
+    if (!a) { applyPhotos([]); setStatus('Waiting for the host', 'idle'); return; }
+
+    if (DEMO_MODE) {
+        applyPhotos(demoPhotos(a.folderId));
+        lastSync = new Date();
+        setStatus('Demo mode', 'idle');
+        return;
+    }
+    try {
+        const res = await fetch(`${CONFIG.GAS_API_URL}?folderId=${encodeURIComponent(a.folderId)}&t=${Date.now()}`);
+        const json = await res.json();
+        if (seq !== fetchSeq || activeAlbum()?.folderId !== a.folderId) return;
+        if (!json.success) throw new Error(json.message || 'API error');
+        applyPhotos(Array.isArray(json.data) ? json.data : []);
+        lastSync = new Date();
+        setStatus(`Live · Updated ${lastSync.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}`, 'live');
+    } catch (err) {
+        if (seq !== fetchSeq) return;
+        console.error(err);
+        setStatus('Connection lost · Retrying…', 'error');
+        if (lastSignature === null) applyPhotos([]);
+    }
+}
+
+function applyPhotos(list) {
+    const prev = new Set(photos.map(keyOf));
+    photos = list;
+    if (initialized) {
+        const fresh = photos.filter(p => !prev.has(keyOf(p))).length;
+        if (fresh && prev.size) toast(`${plural(fresh, 'new photo')} just arrived`);
+    }
+    initialized = true;
+    const keys = new Set(photos.map(keyOf));
+    [...selected].forEach(k => { if (!keys.has(k)) selected.delete(k); });
+    renderGallery();
+    updateSelectionUI();
+}
+
+/* -------------------- GALLERY RENDER -------------------- */
+const io = new IntersectionObserver(entries => {
+    entries.forEach(en => {
+        if (!en.isIntersecting) return;
+        en.target.classList.add('in');
+        revealed.add(en.target.dataset.key);
+        io.unobserve(en.target);
+    });
+}, { rootMargin: '200px 0px 200px 0px', threshold: 0.01 });
+
+function observeTiles(root) { root.querySelectorAll('.tile:not(.in)').forEach(t => io.observe(t)); }
+
+function tileHTML(p, i, delay) {
+    const k = keyOf(p);
+    const seen = revealed.has(k), loaded = loadedSet.has(k);
+    return `
+    <figure class="tile ${seen ? 'in' : ''} ${selected.has(k) ? 'selected' : ''} group relative aspect-[4/5] overflow-hidden rounded-xl sm:rounded-2xl bg-white border border-gold/10 cursor-pointer select-none"
+            data-key="${esc(k)}" data-i="${i}" style="--d:${delay}ms">
+        <div class="shimmer absolute inset-0 ${loaded ? 'done' : ''}"></div>
+        <img src="${esc(p.thumb || p.url)}" alt="Photo ${i + 1}" loading="lazy" decoding="async" draggable="false"
+             onload="imgLoaded(this)" class="${loaded ? 'loaded' : ''} absolute inset-0 w-full h-full object-cover">
+        <div class="tile-shade pointer-events-none absolute inset-0 bg-gradient-to-t from-ink/70 via-ink/10 to-transparent"></div>
+        <button data-action="download" class="tile-dl absolute bottom-2 right-2 sm:bottom-3 sm:right-3 w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-white/90 backdrop-blur text-gold-dark flex items-center justify-center shadow-lg hover:bg-white hover:scale-110 active:scale-95 hover:text-[#3C5337] transition-all border border-gold/20" aria-label="Download">
+            <i class="fa-solid fa-arrow-down text-[10px] sm:text-[13px]"></i>
+        </button>
+        <span class="tile-check absolute top-2 left-2 sm:top-3 sm:left-3 w-6 h-6 sm:w-7 sm:h-7 rounded-full border-2 border-white/90 bg-ink/30 backdrop-blur text-transparent flex items-center justify-center shadow-md">
+            <i class="fa-solid fa-check text-[9px] sm:text-[11px]"></i>
+        </span>
+    </figure>`;
+}
+
+function imgLoaded(img) {
+    img.classList.add('loaded');
+    const t = img.closest('.tile');
+    if (!t) return;
+    loadedSet.add(t.dataset.key);
+    t.querySelector('.shimmer')?.classList.add('done');
+}
+
+function renderGallery() {
+    const state = !db ? 'f' : galleryMissing ? 'x' : activeAlbum() ? 'a' : 'n';
+    const sig = state + '|' + photos.map(keyOf).join('|');
+    if (sig === lastSignature) return;
+    lastSignature = sig;
+
+    const count = $('photo-count');
+    count.textContent = plural(photos.length, 'photo');
+    count.classList.toggle('hidden', !photos.length);
+    $('btn-select').disabled = !photos.length;
+    const grid = $('gallery-grid');
+
+    if (!photos.length) {
+        const [title, sub, icon] = {
+            f: ['Not connected', 'The gallery database is not configured yet.', 'fa-plug-circle-xmark'],
+            x: ['Gallery not found', 'Please check the link or scan the QR code again.', 'fa-link-slash'],
+            n: ['No live album', 'The host has not published an album yet.', 'fa-hourglass-half'],
+            a: ['No photos yet', 'New photos will appear here automatically.', 'fa-image']
+        }[state];
+        grid.innerHTML = `
+            <div class="col-span-full py-20 sm:py-32 text-center fade-in bg-white/40 backdrop-blur-sm rounded-[1.5rem] sm:rounded-[2rem] border border-gold/20 mt-4 shadow-sm">
+                <i class="fa-solid ${icon} text-3xl sm:text-4xl text-gold-light mb-3 sm:mb-4"></i>
+                <p class="font-display text-2xl sm:text-4xl font-bold text-luxury">${title}</p>
+                <p class="text-[13px] sm:text-[15px] text-muted mt-2 sm:mt-3 font-light px-4">${sub}</p>
+            </div>`;
+        return;
+    }
+    let n = 0;
+    grid.innerHTML = photos.map((p, i) => tileHTML(p, i, revealed.has(keyOf(p)) ? 0 : (n++ % 8) * 70)).join('');
+    observeTiles(grid);
+}
+
+function onGridClick(e) {
+    const tile = e.target.closest('.tile');
+    if (!tile) return;
+    const isResult = !!e.target.closest('#result-grid');
+    const p = (isResult ? resultList : photos)[+tile.dataset.i];
+    if (!p) return;
+    if (e.target.closest('[data-action="download"]')) { e.stopPropagation(); return downloadPhotos([p]); }
+    if (selecting && !isResult) return toggleSelect(tile);
+    const idx = photos.findIndex(x => keyOf(x) === keyOf(p));
+    if (idx >= 0) openLightbox(idx);
+}
+$('gallery-grid').addEventListener('click', onGridClick);
+$('result-grid').addEventListener('click', onGridClick);
+
+async function shareGallery() {
+    const url = galleryUrl(gallerySlug);
+    if (navigator.share) { try { await navigator.share({ title: document.title, url }); } catch (e) {} }
+    else copyText(url);
+}
+
+/* -------------------- SELECTION -------------------- */
+function setSelectMode(on) {
+    selecting = on;
+    if (!on) selected.clear();
+    $('gallery-grid').classList.toggle('selecting', on);
+    $('gallery-grid').querySelectorAll('.tile').forEach(t => t.classList.toggle('selected', selected.has(t.dataset.key)));
+    $('btn-select').innerHTML = on ? '<span>Cancel</span>' : '<i class="fa-regular fa-square-check"></i><span>Select</span>';
+    $('btn-select-all').classList.toggle('hidden', !on);
+    updateSelectionUI();
+}
+function toggleSelect(tile) {
+    const k = tile.dataset.key;
+    selected.has(k) ? selected.delete(k) : selected.add(k);
+    tile.classList.toggle('selected', selected.has(k));
+    if (navigator.vibrate) navigator.vibrate(8);
+    updateSelectionUI();
+}
+function selectAll() {
+    const all = selected.size === photos.length;
+    selected.clear();
+    if (!all) photos.forEach(p => selected.add(keyOf(p)));
+    $('gallery-grid').querySelectorAll('.tile').forEach(t => t.classList.toggle('selected', selected.has(t.dataset.key)));
+    updateSelectionUI();
+}
+function clearSelection() { setSelectMode(false); }
+function updateSelectionUI() {
+    const n = selected.size;
+    $('sel-count').textContent = `${n} selected`;
+    $('sel-hint').textContent = n ? (IS_TOUCH ? 'Saves directly to your Photos' : 'Downloads as a ZIP file') : 'Tap photos to select';
+    $('dl-btn').disabled = !n || busy;
+    $('btn-select-all').textContent = n && n === photos.length ? 'Deselect all' : 'Select all';
+    $('action-bar').classList.toggle('show', selecting);
+    $('guest-main').classList.toggle('pb-24', selecting);
+}
+async function downloadSelected() {
+    const ok = await downloadPhotos(photos.filter(p => selected.has(keyOf(p))));
+    if (ok) setSelectMode(false);
+}
+
+/* -------------------- DOWNLOAD ENGINE -------------------- */
+async function photoToFile(p, idx) {
+    let blob;
+    if (DEMO_MODE || !p.id || String(p.id).startsWith('demo-')) {
+        const r = await fetch(p.downloadUrl || p.url, { mode: 'cors' });
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        blob = await r.blob();
+    } else {
+        try {
+            const r = await fetch(`https://lh3.googleusercontent.com/d/${p.id}=w${CONFIG.MAX_DOWNLOAD_WIDTH || 2048}`);
+            if (!r.ok) throw new Error(`HTTP ${r.status}`);
+            blob = await r.blob();
+            if (!blob.type.startsWith('image/')) throw new Error('Not an image');
+        } catch (cdnErr) {
+            const a = activeAlbum();
+            if (!a) throw new Error('No live album');
+            const r = await fetch(`${CONFIG.GAS_API_URL}?action=file&folderId=${encodeURIComponent(a.folderId)}&id=${encodeURIComponent(p.id)}`);
+            const j = await r.json();
+            if (!j.success) throw new Error(j.message || 'File error');
+            const bin = atob(j.data);
+            const bytes = new Uint8Array(bin.length);
+            for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+            blob = new Blob([bytes], { type: j.mimeType || 'image/jpeg' });
+        }
+    }
+    const type = blob.type || 'image/jpeg';
+    const ext = (type.split('/')[1] || 'jpg').replace('jpeg', 'jpg');
+    const base = (p.name || `photo-${idx + 1}`).replace(/\.[^.]+$/, '');
+    return new File([blob], `${base}.${ext}`, { type });
+}
+async function mapLimit(items, limit, fn, onTick) {
+    const out = new Array(items.length);
+    let next = 0, done = 0;
+    async function worker() {
+        while (next < items.length) {
+            const i = next++;
+            try { out[i] = await fn(items[i], i); } catch (e) { console.warn(e); out[i] = null; }
+            onTick(++done);
+        }
+    }
+    await Promise.all(Array.from({ length: Math.min(limit, items.length) }, worker));
+    return out;
+}
+function dedupeNames(files) {
+    const used = {};
+    return files.map(f => {
+        const count = used[f.name] = (used[f.name] || 0) + 1;
+        if (count === 1) return f;
+        const dot = f.name.lastIndexOf('.');
+        return new File([f], `${f.name.slice(0, dot)}-${count}${f.name.slice(dot)}`, { type: f.type });
+    });
+}
+function saveBlob(blob, name) {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = name;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 60000);
+}
+function setProgress(done, total, label) {
+    const bar = $('progress');
+    const btns = ['dl-btn', 'lb-download', 'btn-dl-results'];
+    if (done === null) {
+        bar.style.width = '100%';
+        setTimeout(() => { bar.style.opacity = 0; setTimeout(() => (bar.style.width = '0'), 500); }, 300);
+        btns.forEach(id => { $(id).innerHTML = DEFAULT_LABELS[id]; $(id).disabled = false; });
+        updateSelectionUI();
+        return;
+    }
+    bar.style.opacity = 1;
+    bar.style.width = `${Math.max(4, (done / total) * 100)}%`;
+    const text = label || (total > 1 ? `Preparing ${done}/${total}` : 'Preparing…');
+    btns.forEach(id => { $(id).innerHTML = `<i class="fa-solid fa-circle-notch fa-spin text-sm"></i> ${text}`; $(id).disabled = true; });
+}
+async function downloadPhotos(list) {
+    list = (list || []).filter(Boolean);
+    if (busy || !list.length) return false;
+    busy = true;
+    setProgress(0, list.length);
+    let ok = false;
+    try {
+        let files = (await mapLimit(list, CONFIG.DOWNLOAD_CONCURRENCY, photoToFile, d => setProgress(d, list.length))).filter(Boolean);
+        const failed = list.length - files.length;
+        if (!files.length) throw new Error('All downloads failed');
+        files = dedupeNames(files);
+        if (IS_TOUCH && navigator.canShare && navigator.canShare({ files })) {
+            readyFiles = files;
+            openSheet();
+        } else if (files.length === 1) {
+            saveBlob(files[0], files[0].name);
+            toast('Download started');
+        } else {
+            setProgress(files.length, files.length, 'Creating ZIP…');
+            const zip = new JSZip();
+            files.forEach(f => zip.file(f.name, f));
+            const blob = await zip.generateAsync({ type: 'blob', compression: 'STORE' });
+            saveBlob(blob, `${slug(activeAlbum()?.name)}-${files.length}-photos.zip`);
+            toast(`${plural(files.length, 'photo')} downloaded`);
+        }
+        if (failed) setTimeout(() => toast(`${plural(failed, 'photo')} could not be downloaded`), 1500);
+        ok = true;
+    } catch (err) {
+        console.error(err);
+        toast('Download failed. Please try again.');
+    } finally {
+        busy = false;
+        setProgress(null);
+    }
+    return ok;
+}
+function openSheet() {
+    $('ready-count').textContent = `${plural(readyFiles.length, 'photo')} prepared`;
+    $('ready-sheet').classList.add('open');
+}
+function closeSheet() { $('ready-sheet').classList.remove('open'); }
+async function shareReady() {
+    try {
+        await navigator.share({ files: readyFiles, title: document.title });
+        closeSheet();
+    } catch (e) {
+        if (e.name === 'AbortError') return;
+        readyFiles.forEach(f => saveBlob(f, f.name));
+        closeSheet();
+    }
+}
+
+/* -------------------- LIGHTBOX -------------------- */
+function openLightbox(i) {
+    lbIndex = i;
+    setLbImage(true);
+    $('lightbox').classList.add('open');
+    document.body.style.overflow = 'hidden';
+}
+function closeLightbox() {
+    $('lightbox').classList.remove('open');
+    document.body.style.overflow = '';
+}
+function stepLightbox(d) {
+    if (!photos.length) return;
+    lbIndex = (lbIndex + d + photos.length) % photos.length;
+    setLbImage(false);
+}
+function setLbImage(instant) {
+    const p = photos[lbIndex];
+    if (!p) return closeLightbox();
+    const img = $('lb-img');
+    $('lb-counter').textContent = `${pad(lbIndex + 1)} — ${pad(photos.length)}`;
+    img.classList.add('swap');
+    const apply = () => {
+        img.onload = () => img.classList.remove('swap');
+        img.src = p.url;
+        if (img.complete && img.naturalWidth) requestAnimationFrame(() => img.classList.remove('swap'));
+    };
+    instant ? apply() : setTimeout(apply, 180);
+    [1, -1].forEach(d => {
+        const n = photos[(lbIndex + d + photos.length) % photos.length];
+        if (n) new Image().src = n.url;
+    });
+}
+document.addEventListener('keydown', e => {
+    if (!$('lightbox').classList.contains('open')) return;
+    if (e.key === 'Escape') closeLightbox();
+    if (e.key === 'ArrowLeft') stepLightbox(-1);
+    if (e.key === 'ArrowRight') stepLightbox(1);
+});
+let touchX = null;
+$('lb-stage').addEventListener('touchstart', e => { touchX = e.touches[0].clientX; }, { passive: true });
+$('lb-stage').addEventListener('touchend', e => {
+    if (touchX === null) return;
+    const dx = e.changedTouches[0].clientX - touchX;
+    if (Math.abs(dx) > 50) stepLightbox(dx < 0 ? 1 : -1);
+    touchX = null;
+});
+
+/* -------------------- CAMERA -------------------- */
+async function startCamera() {
+    const err = $('camera-error');
+    err.classList.add('hidden'); err.classList.remove('flex');
+    try {
+        stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' }, audio: false });
+        $('camera').srcObject = stream;
+    } catch (e) {
+        console.error(e);
+        err.classList.remove('hidden'); err.classList.add('flex');
+    }
+}
+function stopCamera() {
+    if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
+}
+function capture() {
+    const v = $('camera');
+    if (!stream || !v.videoWidth) return toast('Camera is not ready');
+    const c = document.createElement('canvas');
+    c.width = v.videoWidth; c.height = v.videoHeight;
+    const ctx = c.getContext('2d');
+    ctx.translate(c.width, 0); ctx.scale(-1, 1);
+    ctx.drawImage(v, 0, 0, c.width, c.height);
+    $('profile-img').src = c.toDataURL('image/jpeg', 0.8);
+    showView('view-result');
+    renderResults();
+}
+function renderResults() {
+    resultList = photos.slice(0, 6);
+    $('btn-dl-results').classList.toggle('hidden', !resultList.length);
+    const grid = $('result-grid');
+    grid.innerHTML = resultList.length
+        ? resultList.map((p, i) => tileHTML(p, i, i * 80)).join('')
+        : `<p class="col-span-full font-display text-2xl sm:text-3xl text-gold-dark py-12 sm:py-20 text-center">No matching photos found.</p>`;
+    grid.querySelectorAll('.tile').forEach(t => t.classList.remove('in'));
+    observeTiles(grid);
+}
+
+/* ==================== ADMIN ==================== */
+let session = null;
+let adminAlbums = [], adminAlbumsRef = null;
+let accountsList = [], accountsRef = null;
+let manageSlug = null, manageName = '';
+let currentTab = 'albums';
+let failedAttempts = 0, lockUntil = 0;
+const isSuper = () => session?.role === 'super';
+const TAB_TITLES = { dashboard: 'Overview', albums: 'Albums', account: 'My account', accounts: 'Accounts' };
+
+function getSession() {
+    try {
+        const s = JSON.parse(sessionStorage.getItem(SESSION_KEY));
+        if (s && s.exp > Date.now()) return s;
+    } catch (e) {}
+    sessionStorage.removeItem(SESSION_KEY);
+    return null;
+}
+function saveSession(s) {
+    session = { ...s, exp: Date.now() + CONFIG.SESSION_HOURS * 3600000 };
+    sessionStorage.setItem(SESSION_KEY, JSON.stringify(session));
+}
+function showLoginError(msg) { const el = $('login-error'); el.textContent = msg; el.classList.remove('hidden'); }
+
+/* ---------- Login ---------- */
+async function authenticate(email, password) {
+    const sa = CONFIG.SUPER_ADMIN;
+    if (email === sa.email.toLowerCase()) {
+        if ((await sha256(password)) !== sa.passwordHash) return null;
+        return { role: 'super', id: 'super', name: CONFIG.SITE_NAME, email, slug: CONFIG.MAIN_SLUG };
+    }
+    if (!db) throw new Error('Firebase is not configured. Member accounts need Firebase.');
+    const snap = await db.ref('accounts').orderByChild('email').equalTo(email).once('value');
+    let acc = null;
+    snap.forEach(c => { acc = { id: c.key, ...c.val() }; });
+    if (!acc || (await memberHash(acc.id, password)) !== acc.passwordHash) return null;
+    return { role: 'member', id: acc.id, name: acc.name, email, slug: acc.slug };
+}
+
+// สร้างแกลเลอรีหลักให้ System Admin และย้ายอัลบั้มจากเวอร์ชันก่อน (ถ้ามี)
+async function ensureMainGallery() {
+    if (!db) return;
+    const ref = db.ref(`galleries/${CONFIG.MAIN_SLUG}`);
+    const snap = await ref.once('value');
+    if (snap.exists()) return;
+    let legacy = null;
+    try { legacy = (await db.ref('albums').once('value')).val(); } catch (e) {}
+    await ref.set({ name: CONFIG.SITE_NAME, owner: 'super', albums: legacy ? normalizeAlbums(legacy) : null });
+}
+
+$('login-form').addEventListener('submit', async e => {
+    e.preventDefault();
+    $('login-error').classList.add('hidden');
+    if (Date.now() < lockUntil) return showLoginError(`Too many attempts. Try again in ${Math.ceil((lockUntil - Date.now()) / 1000)}s.`);
+
+    const email = $('login-email').value.trim().toLowerCase();
+    const password = $('login-password').value;
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return showLoginError('Please enter a valid email address.');
+    if (!password) return showLoginError('Please enter your password.');
+
+    const btn = $('login-btn');
+    setBusy(btn, true, 'Signing in…');
+    try {
+        const s = await authenticate(email, password);
+        if (!s) {
+            if (++failedAttempts >= 5) { lockUntil = Date.now() + 30000; failedAttempts = 0; }
+            return showLoginError('Incorrect email or password.');
+        }
+        failedAttempts = 0;
+        saveSession(s);
+        if (isSuper()) await ensureMainGallery();
+        $('login-password').value = '';
+        showAdminShell();
+        toast(`Welcome, ${s.name}`);
+    } catch (err) {
+        console.error(err);
+        showLoginError(err.message);
+    } finally {
+        setBusy(btn, false);
+    }
+});
+
+function togglePassword() {
+    const input = $('login-password');
+    const show = input.type === 'password';
+    input.type = show ? 'text' : 'password';
+    $('pw-eye').className = `fa-regular ${show ? 'fa-eye-slash' : 'fa-eye'} text-gold-dark`;
+}
+
+function logout() {
+    if (adminAlbumsRef) { adminAlbumsRef.off(); adminAlbumsRef = null; }
+    if (accountsRef) { accountsRef.off(); accountsRef = null; }
+    sessionStorage.removeItem(SESSION_KEY);
+    session = null; adminAlbums = []; accountsList = [];
+    showLogin();
+    toast('Signed out');
+}
+
+/* ---------- Shell ---------- */
+function openAdmin() {
+    stopCamera(); stopPolling(); closeLightbox(); setSelectMode(false);
+    $('app-guest').classList.add('hidden');
+    $('app-admin').classList.remove('hidden');
+    window.scrollTo(0, 0);
+    session = getSession();
+    session ? showAdminShell() : showLogin();
+}
+function exitAdmin(toManaged) {
+    $('app-admin').classList.add('hidden');
+    $('app-guest').classList.remove('hidden');
+    if (toManaged && session) {
+        const target = manageSlug || session.slug;
+        if (target !== gallerySlug) switchGallery(target);
+    }
+    lastSignature = null;
+    renderHeader();
+    showView('view-gallery');
+}
+function showLogin() {
+    $('admin-shell').classList.add('hidden');
+    $('login-screen').classList.remove('hidden');
+    setTimeout(() => $('login-email').focus(), 50);
+}
+function showAdminShell() {
+    $('login-screen').classList.add('hidden');
+    $('admin-shell').classList.remove('hidden');
+    $('admin-name').textContent = session.name;
+    $('admin-email').textContent = session.email;
+    $('admin-role').textContent = isSuper() ? 'System admin' : 'Member';
+    document.querySelectorAll('[data-super]').forEach(el => el.classList.toggle('hidden', !isSuper()));
+    $('pw-form').classList.toggle('hidden', isSuper());
+    $('pw-super-note').classList.toggle('hidden', !isSuper());
+    setManage(session.slug, session.name);
+    if (isSuper()) subscribeAccounts();
+    renderAccount();
+    switchTab('albums');
+}
+function switchTab(tab) {
+    if (tab === 'accounts' && !isSuper()) tab = 'albums';
+    currentTab = tab;
+    document.querySelectorAll('.admin-section').forEach(s => s.classList.add('hidden'));
+    $(`tab-${tab}`).classList.remove('hidden');
+    document.querySelectorAll('.admin-tab[data-tab]').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
+    $('admin-title').textContent = TAB_TITLES[tab];
+    $('admin-title-mobile').textContent = TAB_TITLES[tab];
+    if (tab === 'dashboard') loadStats();
+    if (tab === 'account') renderAccount();
+}
+
+/* ---------- Managed gallery ---------- */
+function setManage(s, name) {
+    manageSlug = s;
+    manageName = name;
+    $('manage-banner').classList.toggle('hidden', s === session.slug);
+    $('manage-name').textContent = name;
+    subscribeAdminAlbums();
+}
+function stopManaging() {
+    setManage(session.slug, session.name);
+    toast('Back to your gallery');
+}
+function subscribeAdminAlbums() {
+    if (adminAlbumsRef) { adminAlbumsRef.off(); adminAlbumsRef = null; }
+    adminAlbums = [];
+    if (!db) { $('album-list').innerHTML = NO_FIREBASE; return; }
+    $('album-list').innerHTML = LOADING_ROW;
+    adminAlbumsRef = db.ref(`galleries/${manageSlug}/albums`);
+    adminAlbumsRef.on('value', snap => {
+        adminAlbums = normalizeAlbums(snap.val());
+        renderAlbums();
+        if (currentTab === 'dashboard') loadStats();
+    }, err => {
+        console.error(err);
+        $('album-list').innerHTML = `<p class="px-6 py-12 text-center text-sm text-red-600">${esc(err.message)}</p>`;
+    });
+}
+async function saveAdminAlbums(list) {
+    if (!db) { toast('Firebase is not configured'); return false; }
+    try {
+        await db.ref(`galleries/${manageSlug}/albums`).set(list.length ? list : null);
+        return true;
+    } catch (e) {
+        console.error(e);
+        toast('Save failed: ' + e.message);
+        return false;
+    }
+}
+
+/* ---------- Overview ---------- */
+async function loadStats() {
+    const live = adminAlbums.find(a => a.isActive);
+    $('stat-albums').textContent = adminAlbums.length;
+    $('stat-active').textContent = live ? live.name : 'None';
+    $('stat-accounts').textContent = accountsList.length + 1;
+    $('stat-sync').textContent = `Gallery: ${manageName} · ${galleryUrl(manageSlug)}`;
+    $('stat-photos').textContent = live ? '…' : '–';
+    if (!live || DEMO_MODE) { if (live) $('stat-photos').textContent = '12'; return; }
+    try {
+        const r = await fetch(`${CONFIG.GAS_API_URL}?folderId=${encodeURIComponent(live.folderId)}&t=${Date.now()}`);
+        const j = await r.json();
+        $('stat-photos').textContent = j.success ? (j.data || []).length : '!';
+    } catch (e) { $('stat-photos').textContent = '!'; }
+}
+
+/* ---------- My account ---------- */
+function renderAccount() {
+    if (!session) return;
+    const url = galleryUrl(session.slug);
+    $('acc-name').textContent = session.name;
+    $('acc-link').textContent = url;
+    $('acc-open').href = url;
+    $('acc-qr').src = qrSrc(url, 400);
+    $('acc-qr-dl').href = qrSrc(url, 1000);
+}
+
+$('pw-form').addEventListener('submit', async e => {
+    e.preventDefault();
+    if (isSuper() || !db) return;
+    const cur = $('pw-current').value, nw = $('pw-new').value, cf = $('pw-confirm').value;
+    if (!cur) return toast('Please enter your current password');
+    if (nw.length < 6) return toast('New password must be at least 6 characters');
+    if (nw !== cf) return toast('New passwords do not match');
+    const btn = $('pw-btn');
+    setBusy(btn, true, 'Updating…');
+    try {
+        const acc = (await db.ref(`accounts/${session.id}`).once('value')).val();
+        if (!acc) throw new Error('Account not found');
+        if ((await memberHash(session.id, cur)) !== acc.passwordHash) throw new Error('Current password is incorrect');
+        await db.ref(`accounts/${session.id}/passwordHash`).set(await memberHash(session.id, nw));
+        $('pw-form').reset();
+        toast('Password updated');
+    } catch (err) { toast(err.message); }
+    finally { setBusy(btn, false); }
+});
+
+/* ---------- Albums ---------- */
+function parseFolderId(input) {
+    const v = input.trim();
+    const m = v.match(/folders\/([a-zA-Z0-9_-]+)/) || v.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+    return m ? m[1] : v;
+}
+
+$('album-form').addEventListener('submit', async e => {
+    e.preventDefault();
+    const name = $('album-name').value.trim();
+    const folderId = parseFolderId($('album-folder').value);
+    if (!name || !folderId) return toast('Please fill in both fields');
+    if (!/^[a-zA-Z0-9_-]{10,}$/.test(folderId)) return toast('Invalid folder ID');
+    if (adminAlbums.some(a => a.folderId === folderId)) return toast('This folder already exists');
+
+    const list = adminAlbums.map(a => ({ ...a, isActive: false }))
+        .concat({ id: Date.now(), name, folderId, isActive: true });
+    const btn = $('album-btn');
+    setBusy(btn, true, 'Adding…');
+    const ok = await saveAdminAlbums(list);
+    setBusy(btn, false);
+    if (ok) {
+        $('album-name').value = '';
+        $('album-folder').value = '';
+        toast('Album added and set live');
+    }
+});
+
+$('album-list').addEventListener('click', async e => {
+    const b = e.target.closest('[data-act]');
+    if (!b) return;
+    const id = Number(b.dataset.id);
+    if (b.dataset.act === 'live') {
+        if (await saveAdminAlbums(adminAlbums.map(a => ({ ...a, isActive: a.id === id })))) toast('Live album updated');
+    } else if (b.dataset.act === 'delete') {
+        if (!confirm('Delete this album? Photos in Google Drive will not be affected.')) return;
+        if (await saveAdminAlbums(adminAlbums.filter(a => a.id !== id))) toast('Album deleted');
+    }
+});
+
+function renderAlbums() {
+    $('album-list').innerHTML = adminAlbums.length
+        ? adminAlbums.map(a => `
+            <div class="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 px-5 sm:px-8 py-4 sm:py-6 ${a.isActive ? 'bg-gold/5' : ''} transition-colors hover:bg-gold/10">
+                <div class="flex-1 min-w-0">
+                    <div class="flex items-center gap-2 sm:gap-3">
+                        <p class="font-display text-lg sm:text-2xl truncate font-bold">${esc(a.name)}</p>
+                        ${a.isActive ? '<span class="chip shrink-0 bg-gradient-to-r from-gold to-gold-dark text-white border-transparent"><span class="w-1.5 h-1.5 rounded-full bg-white/90 animate-pulse"></span>Live</span>' : ''}
+                    </div>
+                    <p class="font-mono text-[10px] sm:text-[12px] text-muted truncate mt-1 opacity-80">${esc(a.folderId)}</p>
+                </div>
+                <div class="flex gap-2 shrink-0 w-full sm:w-auto">
+                    ${a.isActive ? '' : `<button data-act="live" data-id="${esc(a.id)}" class="btn-ghost h-9 sm:h-10 flex-1 sm:flex-none border-gold/20 text-gold-dark">Set live</button>`}
+                    <a href="https://drive.google.com/drive/folders/${encodeURIComponent(a.folderId)}" target="_blank" rel="noopener" class="btn-ghost h-9 w-9 sm:h-10 sm:w-10 px-0 border-gold/20 text-gold-dark" aria-label="Open in Drive"><i class="fa-brands fa-google-drive"></i></a>
+                    <button data-act="delete" data-id="${esc(a.id)}" class="btn-danger" aria-label="Delete"><i class="fa-regular fa-trash-can"></i></button>
+                </div>
+            </div>`).join('')
+        : `<div class="px-5 sm:px-8 py-12 sm:py-20 text-center"><i class="fa-regular fa-folder-open text-3xl sm:text-4xl text-gold/40 mb-3"></i><p class="font-display text-xl sm:text-2xl text-muted font-bold">No albums yet</p><p class="text-[13px] text-muted mt-1 font-light">Add the first Drive folder above.</p></div>`;
+}
+
+/* ---------- Accounts (System admin only) ---------- */
+function subscribeAccounts() {
+    if (accountsRef) { accountsRef.off(); accountsRef = null; }
+    if (!db) { $('acct-list').innerHTML = NO_FIREBASE; return; }
+    $('acct-list').innerHTML = LOADING_ROW;
+    accountsRef = db.ref('accounts');
+    accountsRef.on('value', snap => {
+        accountsList = Object.entries(snap.val() || {})
+            .map(([id, a]) => ({ id, ...a }))
+            .sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
+        renderAccounts();
+        if (currentTab === 'dashboard') loadStats();
+    }, err => {
+        console.error(err);
+        $('acct-list').innerHTML = `<p class="px-6 py-12 text-center text-sm text-red-600">${esc(err.message)}</p>`;
+    });
+}
+
+function accountRow(a, isMain) {
+    const url = galleryUrl(a.slug);
+    const avatar = esc((a.name || a.email || '?').trim().charAt(0).toUpperCase());
+    return `
+    <div class="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 px-5 sm:px-8 py-4 sm:py-5 hover:bg-gold/5 transition-colors">
+        <span class="w-11 h-11 shrink-0 rounded-full ${isMain ? 'bg-gradient-to-br from-gold to-gold-dark text-white' : 'bg-sand text-gold-dark'} font-display text-lg font-bold flex items-center justify-center">${avatar}</span>
+        <div class="flex-1 min-w-0">
+            <div class="flex items-center gap-2 flex-wrap">
+                <p class="font-display text-lg sm:text-xl font-bold truncate">${esc(a.name)}</p>
+                <span class="chip ${isMain ? 'bg-gold/10 border-gold/30 text-gold-dark' : 'bg-white border-line text-muted'}">${isMain ? 'System admin' : 'Member'}</span>
+                ${manageSlug === a.slug ? '<span class="chip bg-emerald-50 border-emerald-200 text-emerald-700">Managing</span>' : ''}
+            </div>
+            <p class="text-[12px] text-muted truncate mt-0.5">${esc(a.email)}</p>
+            <p class="font-mono text-[11px] text-gold-dark truncate mt-0.5">${esc(url)}</p>
+        </div>
+        <div class="flex flex-wrap gap-2 shrink-0">
+            <button data-uact="manage" data-slug="${esc(a.slug)}" data-name="${esc(a.name)}" class="btn-ghost h-9 border-gold/20 text-gold-dark"><i class="fa-regular fa-folder-open text-xs"></i> Manage</button>
+            <button data-uact="copy" data-url="${esc(url)}" class="btn-ghost h-9 w-9 px-0" aria-label="Copy link"><i class="fa-regular fa-copy text-xs"></i></button>
+            <a href="${esc(url)}" target="_blank" rel="noopener" class="btn-ghost h-9 w-9 px-0" aria-label="Open gallery"><i class="fa-solid fa-arrow-up-right-from-square text-xs"></i></a>
+            ${isMain ? '' : `
+            <button data-uact="reset" data-id="${esc(a.id)}" data-name="${esc(a.name)}" class="btn-ghost h-9 w-9 px-0" aria-label="Reset password"><i class="fa-solid fa-key text-xs"></i></button>
+            <button data-uact="delete" data-id="${esc(a.id)}" data-slug="${esc(a.slug)}" data-name="${esc(a.name)}" class="btn-danger" aria-label="Delete account"><i class="fa-regular fa-trash-can text-xs"></i></button>`}
+        </div>
+    </div>`;
+}
+
+function renderAccounts() {
+    $('acct-count').textContent = plural(accountsList.length + 1, 'account');
+    const main = { id: 'super', name: CONFIG.SITE_NAME, email: CONFIG.SUPER_ADMIN.email, slug: CONFIG.MAIN_SLUG };
+    $('acct-list').innerHTML = accountRow(main, true) + accountsList.map(a => accountRow(a, false)).join('');
+}
+
+$('acct-list').addEventListener('click', async e => {
+    const b = e.target.closest('[data-uact]');
+    if (!b || !isSuper()) return;
+    const act = b.dataset.uact;
+
+    if (act === 'copy') return copyText(b.dataset.url);
+
+    if (act === 'manage') {
+        setManage(b.dataset.slug, b.dataset.name);
+        renderAccounts();
+        switchTab('albums');
+        if (b.dataset.slug !== session.slug) toast(`Managing ${b.dataset.name}`);
+        return;
+    }
+
+    if (act === 'reset') {
+        const pw = prompt(`New password for "${b.dataset.name}" (6+ characters):`);
+        if (pw === null) return;
+        if (pw.length < 6) return toast('Password must be at least 6 characters');
+        try {
+            await db.ref(`accounts/${b.dataset.id}/passwordHash`).set(await memberHash(b.dataset.id, pw));
+            toast('Password reset');
+        } catch (err) { toast(err.message); }
+        return;
+    }
+
+    if (act === 'delete') {
+        if (!confirm(`Delete "${b.dataset.name}"? Their gallery and album list will be removed. Photos in Google Drive will not be affected.`)) return;
+        try {
+            await db.ref().update({ [`accounts/${b.dataset.id}`]: null, [`galleries/${b.dataset.slug}`]: null });
+            if (manageSlug === b.dataset.slug) setManage(session.slug, session.name);
+            toast('Account deleted');
+        } catch (err) { toast(err.message); }
+    }
+});
+
+$('acct-form').addEventListener('submit', async e => {
+    e.preventDefault();
+    if (!isSuper()) return;
+    if (!db) return toast('Firebase is not configured');
+    const name = $('acct-name').value.trim();
+    const s = slugify($('acct-slug').value) || slugify(name);
+    const email = $('acct-email').value.trim().toLowerCase();
+    const pw = $('acct-password').value;
+
+    if (!name) return toast('Please enter a name');
+    if (!s || s.length < 3) return toast('Gallery link needs at least 3 characters (a-z, 0-9, -)');
+    if (s === CONFIG.MAIN_SLUG) return toast(`"${CONFIG.MAIN_SLUG}" is reserved`);
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return toast('Please enter a valid email');
+    if (pw.length < 6) return toast('Password must be at least 6 characters');
+    if (email === CONFIG.SUPER_ADMIN.email.toLowerCase() || accountsList.some(a => a.email === email)) return toast('This email is already in use');
+    if (accountsList.some(a => a.slug === s)) return toast('This gallery link is already taken');
+
+    const btn = $('acct-btn');
+    setBusy(btn, true, 'Creating…');
+    try {
+        if ((await db.ref(`galleries/${s}`).once('value')).exists()) throw new Error('This gallery link is already taken');
+        const id = db.ref('accounts').push().key;
+        await db.ref().update({
+            [`accounts/${id}`]: { name, email, slug: s, passwordHash: await memberHash(id, pw), createdAt: Date.now() },
+            [`galleries/${s}`]: { name, owner: id }
+        });
+        $('acct-form').reset();
+        $('acct-slug').dataset.touched = '';
+        updateSlugPreview();
+        toast('Account created · starts with no albums');
+    } catch (err) { toast(err.message); }
+    finally { setBusy(btn, false); }
+});
+
+function updateSlugPreview() {
+    const v = slugify($('acct-slug').value) || slugify($('acct-name').value);
+    $('acct-slug-preview').textContent = v ? galleryUrl(v) : 'Example: wedding-studio';
+}
+$('acct-name').addEventListener('input', () => {
+    if (!$('acct-slug').dataset.touched) $('acct-slug').value = slugify($('acct-name').value);
+    updateSlugPreview();
+});
+$('acct-slug').addEventListener('input', () => {
+    $('acct-slug').dataset.touched = $('acct-slug').value ? '1' : '';
+    updateSlugPreview();
+});
+
+/* -------------------- INIT -------------------- */
+window.addEventListener('DOMContentLoaded', () => {
+    ['dl-btn', 'lb-download', 'btn-dl-results'].forEach(id => DEFAULT_LABELS[id] = $(id).innerHTML);
+    updateSlugPreview();
+    subscribeGallery();
+    showView('view-gallery');
+});
+</script>
+</body>
+</html>
